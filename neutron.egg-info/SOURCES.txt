@@ -1,7 +1,0 @@
-setup.py
-neutron/__init__.py
-neutron.egg-info/PKG-INFO
-neutron.egg-info/SOURCES.txt
-neutron.egg-info/dependency_links.txt
-neutron.egg-info/not-zip-safe
-neutron.egg-info/top_level.txt
