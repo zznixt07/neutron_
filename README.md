@@ -1,0 +1,41 @@
+# Neutron
+A download manager
+
+**Features**
+
+ - Categorize downloaded files automatically
+ - Progress Bar (using tqdm)
+ - Name the downloaded file manually
+ - Provide a Custom location for download directory
+
+**Installation**
+
+`git clone https://github.com/zznixt07/neutron_`
+
+**Requirements**
+ - requests
+ - tqdm (optional)
+ 
+ `pip install requests tqdm`
+
+**Usage**
+
+```
+import neutron
+
+# download image from 'https://cdn.pixabay.com/photo/2019/10/04/18/36/milky-way-4526277_1280.jpg'
+neutron.get('https://cdn.pixabay.com/photo/2019/10/04/18/36/milky-way-4526277_1280.jpg')
+
+# download video from 'https://i.imgur.com/aMUFgbO.mp4'
+neutron.get('https://i.imgur.com/aMUFgbO.mp4', 
+			customName='earthfromspace')
+
+# some download require auth which can be stored in requests.Session
+import requests
+with requests.Session() as s:
+    # ...login and store cookies in s
+    neutron.get('https://i.imgur.com/aMUFgbO.mp4', 
+			sess=s, 
+            customName='happy_earth',
+            customPath = '/usr/bin')
+```
