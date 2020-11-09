@@ -9,12 +9,17 @@ https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition
 import os
 import mimetypes
 import platform
-# import time
 import warnings
 import requests
-from tqdm import tqdm
 from .constants import *
-warnings.filterwarnings('ignore')
+warnings.filterwarnings('ignore')           # verify=False
+
+try:
+    from tqdm import tqdm
+    _tqdm_ = True
+except ImportError:
+    _tqdm_ = False
+
 
 class Downloader:
     ''':dUrl: - url to download from
@@ -93,17 +98,21 @@ class Downloader:
 
         fullPath = enumIfFileExists(fullPath)
         with open(fullPath, 'wb') as f:
-            if totalSize is None:
+            if totalSize == 0:
                 print('CANNOT DETERMINE TOTAL SIZE!! PROGRESS BAR WILL BE INCORRECT!!')
             try:
-                for chunk in tqdm(iterable=r.iter_content(chunk_size=self.chunkSize),
-                                     total=totalSize//self.chunkSize,
-                                     unit='KB'):
-                    f.write(chunk)
+                if _tqdm_:
+                    for chunk in tqdm(
+                            iterable=r.iter_content(chunk_size=self.chunkSize),
+                            total=(totalSize//self.chunkSize),
+                            unit='KB'):
+                        f.write(chunk)
+                else:
+                    for chunk in ProgressBar(
+                            iterable=r.iter_content(chunk_size=self.chunkSize),
+                            total=totalSize):
+                        f.write(chunk)
 
-                # for c, chunk in enumerate(r.iter_content(chunk_size=self.chunkSize)):
-                    # f.write(chunk)
-                    # Downloader.progressBar(totalSize, self.chunkSize, c)
             finally:
                 r.close()
 
@@ -156,7 +165,6 @@ class Downloader:
             print('cant categorize')
             return self.dwnld
 
-
     def makeDirIfNoDir(self, dwnldFolder):
         """Only for Downloads folder to categorize files"""
         for folder in self.groupExt.keys():
@@ -190,7 +198,51 @@ def enumIfFileExists(fp):
     return os.path.join(parent, keepChecking(fullname))
 
 
+class ProgressBar:
+    '''
+    iterable: response.iter_content
+    totalSize: bytes
+    '''    
+
+    def __init__(self, iterable, total): 
+        self.iterable = iterable
+        self.chunkSize = None
+        self.totalSize = total
+        if self.totalSize == 0:
+            print('NO FILE SIZE!! PROGRESS BAR WON\'T BE AVAILABLE!!')
+            self.totalSize = 1      # fixing ZeroDivisionError
+            self.chunkSize = 0      # easy fix, makes progress bar stuck at 0%
+        # len(self.iterable.__next__()) gives chunk size
+        self.currCount = 0
+        self.toDisplay = '■'
+        self.width = 30 # in ch
+        self.percentComplete = 0
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        nextChunk = self.iterable.__next__()
+        if self.chunkSize is None: self.chunkSize = len(nextChunk)
+        # since chunkSize is taken from the first chunk, it will always be
+        # <totalSize. if chunkSize was userdefined and 
+        p = (self.chunkSize * self.currCount) / self.totalSize # range [0-1]
+        per = f'{p:.0%}'
+        self.currCount += 1
+        # this makes it so that only 100 max.. lines are printed.
+        if self.percentComplete == per:
+            # prev and current % is same: dont print huge amt to stdout.
+            return nextChunk
+        self.percentComplete = per
+        print(f"{self.percentComplete:<4}|{self.toDisplay * int(p * self.width)}" \
+                .ljust(self.width+4) + '|') # +4 cuz 4 char is covered by %
+        # easier hardcoded way
+        # print(f"{self.percentComplete:<4}|{self.toDisplay * int(p * 10):<10}|")
+        return nextChunk
+
+
 if __name__ == "__main__":
+    # restricted char in filename (windows)
     dp = Downloader('https://i.imgur.com/zOx3E2a.jpg', customName='peepee1::')
     print('\n\n')
     print(dp)
