@@ -4,9 +4,11 @@ A download manager
 **Features**
 
  - Categorize downloaded files automatically
- - Progress Bar (using tqdm)
- - Name the downloaded file manually
- - Provide a Custom location for download directory
+ - Progress Bar
+ - Provide a Custom name and location for download file or directory
+ - names the file as sent by the server or tries to guess it.
+ - Enumerates if a file with same name already exists(default) or overwrites it.
+ - Supports requests session and query params using dict.
 
 **Installation**
 

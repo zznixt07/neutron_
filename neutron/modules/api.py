@@ -1,8 +1,14 @@
 from .main_downloader import Downloader
 
-def get(dUrl, sess=None, customName=None, customPath=None):
+def get(dUrl,
+        params: dict = None,
+        sess=None,
+        customName: str = None,
+        customPath: str = None,
+        overwrite: bool = False) -> str:
     '''
     :dUrl: - url to Download from
+    :params: - params in the url as dict
     :sess: None - `requests.Session` obj
     :customName: None - Name for the file
     :customPath: None - Full path to the directory where file
@@ -10,6 +16,9 @@ def get(dUrl, sess=None, customName=None, customPath=None):
     :rtype: Path
     '''
     return Downloader(dUrl,
+                    params=params,
                     sess=sess,
                     customName=customName,
-                    customPath=customPath).downloadPath
+                    customPath=customPath,
+                    overwrite=overwrite).downloadPath
+
