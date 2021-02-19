@@ -96,13 +96,16 @@ class Downloader:
                         self.tryContentType(rHdrs, defaultName) or \
                         None
         else:
-            # this may or may not have extension
+            # this may or may not have extension but if it has extension then
+            # its |preferred|
             givenName = self.customName
-            # order matters
-            fullname = self.hasExt(givenName) or \
-                        self.tryContentDisposition(rHdrs, preferThis=givenName) or \
-                        self.tryContentType(rHdrs, givenName) or \
-                        None
+            if givenName.split('.')[-1]:
+                fullname = givenName
+            else:
+                fullname = self.hasExt(givenName) or \
+                            self.tryContentDisposition(rHdrs, preferThis=givenName) or \
+                            self.tryContentType(rHdrs, givenName) or \
+                            None
         
         if fullname is None: return None, "couldn't guess the extension"
         fullname = removeInvalidCharInPath(fullname)
@@ -133,7 +136,7 @@ class Downloader:
             finally:
                 r.close()
 
-        logger.debug(f'Downloaded to: {fullPath}')
+        logger.debug('Downloaded to: %s' % fullPath)
         return fullPath
 
     @staticmethod 
@@ -169,7 +172,7 @@ class Downloader:
         ext = mimetypes.guess_extension(conType)
         
         if ext is not None:
-            logger.debug('appending extension', ext)
+            logger.debug('appending extension %s' % ext)
             return string + ext
 
         return None
