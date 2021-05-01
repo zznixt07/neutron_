@@ -12,7 +12,7 @@ A download manager
 
 **Installation**
 
-`git clone https://github.com/zznixt07/neutron_`
+`pip install git+https://git@github.com/zznixt07/neutron_.git`
 
 **Requirements**
  - requests
