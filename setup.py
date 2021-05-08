@@ -7,7 +7,10 @@ setup(name='neutron',
     author='zznixt07',
     author_email='zznixt07@protonmail.com',
     license='MIT',
-    packages=['neutron'],
+    packages=[
+        'neutron',
+        'neutron.modules',
+    ],
     install_requires=[
         'requests'
     ],
