@@ -238,8 +238,8 @@ class ProgressBar:
             self.chunkSize = 0      # easy fix; makes progress bar stuck at 0%
                                     # len(self.iterable.__next__()) gives chunk size
         self.currCount = 0
-        self.toDisplay = '■'
-        self.width = 30             # in ch
+        self.toDisplay = '·'
+        self.width = 30             # in characters
         self.percentComplete = 0
 
     def __iter__(self):
@@ -251,7 +251,7 @@ class ProgressBar:
             # get chunkSize from .iter_content()
             self.chunkSize = len(nextChunk)
 
-        # since chunkSize is taken from the first chunk, it will always be <totalSize.
+        # since chunkSize is taken from the first chunk, it will always be < totalSize.
         p = (self.chunkSize * self.currCount) / self.totalSize # range [0-1]
         per = f'{p:.0%}'
         self.currCount += 1
@@ -262,8 +262,11 @@ class ProgressBar:
             return nextChunk
         
         self.percentComplete = per
-        print(f"{self.percentComplete:<4}|{self.toDisplay * int(p * self.width)}" \
-                .ljust(self.width+4) + '|') # +4 cuz 4 char is covered by %
+        print(
+            f"{self.percentComplete:<4}|"
+            + f"{self.toDisplay * int(p * self.width)}".ljust(self.width+4)
+            + '|'                   # +4 cuz max 4 char is covered by max '100%'
+        )
         
         # easier hardcoded way
         # print(f"{self.percentComplete:<4}|{self.toDisplay * int(p * 10):<10}|")
@@ -278,17 +281,17 @@ if __name__ == "__main__":
 
     Downloader('https://cdn.pixabay.com/photo/2019/10/04/18/36/milky-way-4526277_1280.jpg')
 
-    # download video from 'https://file-examples-com.github.io/uploads/2020/03/file_example_WEBM_480_900KB.webm'
-    Downloader(
-        'https://file-examples-com.github.io/uploads/2020/03/file_example_WEBM_480_900KB.webm',
-        customName='earthfromspace.webm')
+    # # download video from 'https://file-examples-com.github.io/uploads/2020/03/file_example_WEBM_480_900KB.webm'
+    # Downloader(
+    #     'https://file-examples-com.github.io/uploads/2020/03/file_example_WEBM_480_900KB.webm',
+    #     customName='earthfromspace.webm')
 
-    # some download require auth which can be stored in `requests.Session`
-    import requests
-    with requests.Session() as sess:
-        # ...login and store cookies in `sess`
-        Downloader(
-            'https://file-examples-com.github.io/uploads/2020/03/file_example_WEBM_480_900KB.webm',
-            sess=sess,
-            customName='happy_earth.webm',
-            customPath='c:\\')
+    # # some download require auth which can be stored in `requests.Session`
+    # import requests
+    # with requests.Session() as sess:
+    #     # ...login and store cookies in `sess`
+    #     Downloader(
+    #         'https://file-examples-com.github.io/uploads/2020/03/file_example_WEBM_480_900KB.webm',
+    #         sess=sess,
+    #         customName='happy_earth.webm',
+    #         customPath='c:\\')
