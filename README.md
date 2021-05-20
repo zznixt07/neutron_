@@ -28,16 +28,18 @@ import neutron
 # download image from 'https://cdn.pixabay.com/photo/2019/10/04/18/36/milky-way-4526277_1280.jpg'
 neutron.get('https://cdn.pixabay.com/photo/2019/10/04/18/36/milky-way-4526277_1280.jpg')
 
-# download video from 'https://i.imgur.com/aMUFgbO.mp4'
-neutron.get('https://i.imgur.com/aMUFgbO.mp4', customName='earthfromspace')
+# download video from 'https://file-examples-com.github.io/uploads/2020/03/file_example_WEBM_480_900KB.webm'
+neutron.get(
+    'https://file-examples-com.github.io/uploads/2020/03/file_example_WEBM_480_900KB.webm',
+    customName='earthfromspace.webm')
 
 # some download require auth which can be stored in `requests.Session`
 import requests
 with requests.Session() as sess:
     # ...login and store cookies in `sess`
     neutron.get(
-        'https://i.imgur.com/aMUFgbO.mp4',
+        'https://file-examples-com.github.io/uploads/2020/03/file_example_WEBM_480_900KB.webm',
         sess=sess,
-        customName='happy_earth',
-        customPath = '/usr/bin')
+        customName='happy_earth.webm',
+        customPath='c:\\')
 ```

@@ -8,7 +8,7 @@ import platform
 import mimetypes
 import urllib.parse
 import requests
-from .constants import *
+from .constants import mainExtensions
 
 # warnings.filterwarnings('ignore')           # verify=False
 logger = logging.getLogger(__name__)
@@ -112,12 +112,13 @@ class Downloader:
         ext = fullname.split('.')[-1]
 
         if self.customPath: # if customPath is provided dont categorize
-            parent = self.customPath        # has extension
+            parent = self.customPath
         else:
-            parent = self.catgPath(ext)    # has extension
-        fullPath = os.path.join(parent, fullname)
+            parent = self.catgPath(ext)
         if not self.overwrite:
-            fullPath = enumIfFileExists(fullname, parent)
+            fullPath = os.path.join(parent, enumIfFileExists(fullname, parent))
+        else:
+            fullPath = os.path.join(parent, fullname)
         
         with open(fullPath, 'wb') as f:
             if totalSize == 0:
@@ -181,7 +182,7 @@ class Downloader:
 
     def catgPath(self, urlOrExt):
         # if the extension is present in dict, insert it in respective dirs.        
-        for catg in self.groupExt.keys():
+        for catg in self.groupExt:
             if urlOrExt.endswith(self.groupExt[catg]):
                 return os.path.join(self.dwnld, catg)
         
@@ -211,7 +212,7 @@ def enumIfFileExists(fname, parent):
     i = 0
     justname, dotExt = os.path.splitext(fname)
     files = os.listdir(parent)
-    
+
     def keepChecking(innerFilename):
         nonlocal i
         if innerFilename in files:
@@ -274,3 +275,20 @@ if __name__ == "__main__":
     FORMAT = '[%(module)s] :: %(levelname)s :: %(message)s'
     logging.getLogger("urllib3").setLevel(logging.WARNING)
     logging.basicConfig(level=logging.DEBUG, format=FORMAT)
+
+    Downloader('https://cdn.pixabay.com/photo/2019/10/04/18/36/milky-way-4526277_1280.jpg')
+
+    # download video from 'https://file-examples-com.github.io/uploads/2020/03/file_example_WEBM_480_900KB.webm'
+    Downloader(
+        'https://file-examples-com.github.io/uploads/2020/03/file_example_WEBM_480_900KB.webm',
+        customName='earthfromspace.webm')
+
+    # some download require auth which can be stored in `requests.Session`
+    import requests
+    with requests.Session() as sess:
+        # ...login and store cookies in `sess`
+        Downloader(
+            'https://file-examples-com.github.io/uploads/2020/03/file_example_WEBM_480_900KB.webm',
+            sess=sess,
+            customName='happy_earth.webm',
+            customPath='c:\\')
