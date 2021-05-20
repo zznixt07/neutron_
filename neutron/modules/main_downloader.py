@@ -28,7 +28,7 @@ class Downloader:
     :sess: None - `requests.Session` obj
     :customName: None - Name for the file
     :customPath: None - Full path to the directory where file
-                        will be downloaded (exclude filename)
+                        will be downloaded (excluding filename)
     '''
 
     groupExt = mainExtensions
@@ -108,14 +108,16 @@ class Downloader:
                             None
         
         if fullname is None: return None, "couldn't guess the extension"
-        fullname = removeInvalidCharInPath(fullname)
+        fullname = removeInvalidCharInFileName(fullname)
         ext = fullname.split('.')[-1]
 
         if self.customPath: # if customPath is provided dont categorize
-            fullPath = os.path.join(self.customPath, fullname)# has extension
+            parent = self.customPath        # has extension
         else:
-            fullPath = os.path.join(self.catgPath(ext), fullname)# has extension
-        if not self.overwrite: fullPath = enumIfFileExists(fullPath)
+            parent = self.catgPath(ext)    # has extension
+        fullPath = os.path.join(parent, fullname)
+        if not self.overwrite:
+            fullPath = enumIfFileExists(fullname, parent)
         
         with open(fullPath, 'wb') as f:
             if totalSize == 0:
@@ -194,7 +196,7 @@ class Downloader:
             os.makedirs(os.path.join(dwnldFolder, folder), exist_ok=True)
         return 'All required folder are available.'
 
-def removeInvalidCharInPath(p):
+def removeInvalidCharInFileName(p):
     splitted = p.split(os.path.sep)
     # if 'windows' in platform.system().lower():
     invalids = '\\/:?*<>|"'
@@ -204,21 +206,20 @@ def removeInvalidCharInPath(p):
 
     return (os.path.sep).join(splitted)
         
-def enumIfFileExists(fp):
+def enumIfFileExists(fname, parent):
     '''check if file already exists. if it does, tries to number it.'''
     i = 0
-    parent, fullname = os.path.split(fp)
-    # '.'.join(f.split('.')[:-1]), f.split('.')[-1]
-    justname, dotExt = os.path.splitext(fullname)
-
+    justname, dotExt = os.path.splitext(fname)
+    files = os.listdir(parent)
+    
     def keepChecking(innerFilename):
         nonlocal i
-        if innerFilename in os.listdir(parent):
+        if innerFilename in files:
             i += 1
             return keepChecking(f'{justname}_({i}){dotExt}')
         else:
             return innerFilename
-    return os.path.join(parent, keepChecking(fullname))
+    return keepChecking(fname)
 
 
 class ProgressBar:
