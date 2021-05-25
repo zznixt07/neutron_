@@ -22,6 +22,12 @@ except ImportError:
     logger.debug('tqdm installation NOT found.')
     _tqdm_ = False
 
+# if None, then proxy is ignored
+PROXIES = {
+    'http': os.getenv('http_proxy') or os.getenv('HTTP_PROXY'),
+    'https': os.getenv('https_proxy') or os.getenv('HTTPS_PROXY'),
+}
+
 
 class Downloader:
     ''':dUrl: - url to download from
@@ -46,7 +52,8 @@ class Downloader:
         overwrite: bool = False):
 
         if params:
-            try: dUrl += '?' + urllib.parse.urlencode(params)
+            try:
+                dUrl += '?' + urllib.parse.urlencode(params)
             except TypeError as e:
                 logger.error('params should be of type dict or a mapping')
                 raise e
@@ -67,22 +74,14 @@ class Downloader:
 
         if self.sess is None:
             self.sess = requests.Session()
-
+        self.sess.proxies.update(PROXIES)
         self.downloadPath = self.mainDownloader()
 
     def mainDownloader(self):
-        # defer downloading the resp body until you access the Response.content attribute
-        # by setting stream=True. used for figuring out size, name, ext of file
-        # from headers only before downloading actual data
-        try:
-            req = requests.Request('GET', self.dUrl)
-            self.prep = self.sess.prepare_request(req)
-            self.chunkSize = 1024 * 8        
-            r = self.sess.send(self.prep, stream=True, verify=True, timeout=40)
-        
-        except requests.exceptions.RequestException:
-            # sometimes new session cannot be created. dunno y.
-            r = self.sess.get(self.dUrl, stream=True, verify=True, timeout=40)
+        req = requests.Request('GET', self.dUrl)
+        self.prep = self.sess.prepare_request(req)
+        self.chunkSize = 1024 * 8        
+        r = self.sess.send(self.prep, stream=True, verify=True, timeout=40)
         r.raise_for_status()
         
         rHdrs = {k.lower(): v for k, v in r.headers.items()}
